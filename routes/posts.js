@@ -4,6 +4,7 @@ const User = require('../models/User');
 //create a post
 
 router.post('/create',async(req,res)=>{
+    console.log("hello");
     const newPost = new Post(req.body);
     try{
         const savedPost = await newPost.save();
@@ -86,10 +87,10 @@ router.get('/:id',async(req,res)=>{
 
 //get timeline posts
 
-router.get('/timeline/all',async(req,res) => {
+router.get('/timeline/:userId',async(req,res) => {
     
     try{
-        const curUser = await User.findById(req.body.userId);
+        const curUser = await User.findById(req.params.userId);
         const userPosts = await Post.find({userId:curUser._id});
         
         const friendPosts = await Promise.all(
@@ -98,12 +99,29 @@ router.get('/timeline/all',async(req,res) => {
             })
         );
          
-        res.json(userPosts.concat(...friendPosts))
+        res.status(200).json(userPosts.concat(...friendPosts))
 
     }catch(err){
-        res.status(500).json("Error");
+        res.status(510).json("Error");
     }
 })
+
+//get user's all post 
+
+router.get('/profile/:username',async(req,res) => {
+    
+    try{
+        const user = await User.findOne({username:req.params.username});
+        const posts = await Post.find({userId : user._id});
+         
+        res.status(200).json(posts); 
+
+    }catch(err){
+        res.status(510).json("Error");
+    }
+})
+
+
 
 
 module.exports = router;
